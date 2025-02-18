@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeju Travel</title>
+    <style>
+        @font-face {
+            font-family: 'GmarketSansMedium';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        body {
+            background-color: #F8F0E6;
+            font-family: 'GmarketSansMedium', sans-serif; 
+            text-align: center;
+            padding:10px;
+        }
+        h1 {
+            font-weight: bold; 
+            color: #1B4D3E; 
+        }
+        .container {
+            max-width: 350px;
+            margin: auto;
+            padding: 15px;
+            background: #F1E3D3;
+            border-radius: 10px;
+            box-shadow: inset 5px 5px 10px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .tabs button {
+            padding: 10px;
+            margin: -5px;
+            border: none;
+            border-radius: 0px;
+            background-color: #E07A5F;
+            color: #F1E3D3;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.3s; /* 애니메이션 추가 */
+        }
+        
+        .tabs button.active {
+            background-color: #d3502c;
+            font-weight: bold;
+            transform: scale(1.03); /* 클릭 시 버튼 커짐 효과 */
+            box-shadow: 0 3px 3px #d3502c;
+
+        }
+        
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #F1E3D3;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 15px;
+        }
+        .time {
+            background: #1B4D3E;
+            color: #F1E3D3;
+            padding: 3px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+
+        }
+                /* 모달 스타일 */
+        .modal {
+            display: none; /* 기본적으로 숨김 */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4); /* 반투명 배경 */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 300px;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+            </style>
+</head>
+<body>
+    <h1>제주도 여행</h1>
+    <div class="container">
+        <div class="tabs">
+            <button class="active" onclick="changeDay('day1')">첫째 날</button>
+            <button onclick="changeDay('day2')">둘째 날</button>
+            <button onclick="changeDay('day3')">셋째 날</button>
+        </div>
+        <div id="schedule">
+            <div class="schedule-item">
+                <span class="time">2025.02.20</span>
+                <span>여행 시작 </span>
+                <span>🔖</span>
+            </div>
+            <div class="schedule-item">
+                <span class="time">2025.02.22</span>
+                <span>여행 끝</span>
+                <span>🔖</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모달 구조 추가 -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">×</span>
+            <p id="modalContent"></p>
+        </div>
+    </div>
+
+
+    <script>
+        const schedules = {
+            day1: [
+                { time: "00:00~8:30", location: "광주 공항 도착" ,additionalInfo: "가는법 :집에서 각자 공항까지 " },
+                { time: "09:35~10:30", location: "광주 -> 제주 " ,additionalInfo : "가는법 : 비행기 \n비용 : 71100원 "},
+                { time: "10:30~11:30", location: "수화물, 렌트카 대여 " ,additionalInfo: "일정 :도착해서 렌트카 대여 \n비용 : 27500원"},
+                { time: "11:30~12:30", location: "점심",additionalInfo: "기는법 : 도보 \n일정 : 점심 \n비용 : 15000원 " },
+                { time: "12:30~13:00", location: "수목원으로 이동 " ,additionalInfo: "가는법 : 차 \n일정 : 이동 "},
+                { time: "13:00~14:30", location: "한라 수목원 구경" ,additionalInfo: "가는법 : 차 \n일정 : 한라 수목원 구경 \n비용 : 입장비 1000원, 주차비 : 1000원 \n주소 : 제주특별자치도 제주시 수목원길 72"},
+                { time: "14:30~15:30", location: "제주도 스타벅스",additionalInfo: "가는법 : 차 \n일정 : 제주 한정 음료 마시기 \n비용 : 10000원 \n주소 : (스타벅스 제주 한라 수목원 DT점 )제주특별자치도 제주시 수목원서길 3-5" },
+                { time: "15:30~16:00", location: "스벅 -> 박물관" ,additionalInfo: "가는법 : 차 \n일정 : 이동 "},
+                { time: "16:00~18:00", location: "넥슨 컴퓨터 박물관",additionalInfo: "가는법 : 차 \n일정: 구경 \n비용 : 입장료 8000원 \n주소 : 제주특별자치도 제주시 노형동 86 " },
+                { time: "18:00~18:30", location: "하이제주" ,additionalInfo: "가는법 : 차 \n일정  : 개인 쇼핑 \n비용 : 각자 \n주소 : 제주특별자치도 제주시 노연로 81 1층"},
+                { time: "18:30~19:00", location: "시소 카이막" ,additionalInfo: "가는법 : 차 \n일정 : 맛있는 카이막 먹기 \n비용 : 각자 \n주소 : 제주특별자치도 제주시 애월읍 애월해안로 566"},
+                { time: "19:00~19:30", location: "숙소 이동" ,additionalInfo: "가는법 : 차 \n일정 : 이동 "},
+                { time: "19:30~21:00", location: "저녁" ,additionalInfo: "가는법 : 도보 or 택시 \n일정: 회먹기 \n비용 : 35000원 \n주소 : 제주특별자치도 제주시 애월읍 애월로 12 1층"},
+                { time: "21:00~22:00", location: "해변 구경",additionalInfo: "가는법 : 도보 \n일정 : 해변 산책 " },
+                { time: "22:00~10:00", location: "취침",additionalInfo: "가는법 : 도보 \n일정 : 술 마시고 취침 \n비용 : 28882원 \n주소 : 레이지타임 독채 펜션 ( 제주특별자치도 제주시 애월읍 일주서로 6066-22 레이지마마타운하우스 G동 ) " }
+
+            ],
+            day2: [
+                { time: "00:00~10:00", location: "기상",additionalInfo: "일정 : 기상~" },
+                { time: "10:00~10:30", location: "숙소 -> 브런치오",additionalInfo: "가는법 : 차  \n일정 : 이동" },
+                { time: "10:30~11:30", location: "브런치오 브런치" ,additionalInfo: "가는법 : 차 \n일정 : 끝내주는 브런치를 먹자 \n비용 : 20000원 \n주소 : 제주특별자치도 제주시 애월읍 애월해안로 454-3 1층"},
+                { time: "11:30~12:00", location: "브런치오->오셜록",additionalInfo: "가는법 : 차 \n일정 : 이동 " },
+                { time: "12:00~13:00", location: "오셜록티뮤지엄" ,additionalInfo: "가는법 : 차 \n일정 : 구경 \n비용 : 입장료 0원 \n주소 : 제주특별자치도 서귀포시 안덕면 신화역사로 15"},
+                { time: "13:00~13:15", location: "오셜록->박물관" ,additionalInfo: "가는법 : 차 \n일정 : 이동 "},
+                { time: "13:15~14:30", location: "세계자동차박물관" ,additionalInfo: "가는법 : 차 \n일정 : 멋진 자동차를 구경할것이다 \n비용 :13000원 \n주소 : 제주특별자치도 서귀포시 안덕면 중산간서로 1610 "},
+                { time: "14:30~14:35", location: "박물관->카멜리아힐" ,additionalInfo: "가는법 : 차 \n일정 : 이동 "},
+                { time: "14:35~15:30", location: "카멜리아힐",additionalInfo: "가는법 : 차 \n일정 : 수목원 구경  \n비용 : 입장료 : 10000원 \n주소 : 제주특별자치도 서귀포시 안덕면 병악로 166"},
+                { time: "15:30~16:00", location: "카멜리아힐->천지연폭포" ,additionalInfo: "가는법 : 차 \n일정 : 이동 "},
+                { time: "16:00~17:30", location: "천지연폭포" ,additionalInfo: "가는법 : 차 \n일정 : 폭포 구경 \n비용 : 입장료 2000원 \n주소 : 제주특별자치도 서귀포시 서홍동 2565 "},
+                { time: "17:30~18:30", location: "천지연폭포->숙소" ,additionalInfo: "가는법 : 차 \n일정 : 이동 "},
+                { time: "18:30~19:00", location: "숙소 휴식",additionalInfo: "가는법 : 없음 \n일정 : 기절" },
+                { time: "19:00~20:30", location: "돌담길 괴기집",additionalInfo: "가는법 : 도보 \n일정 : 끝내주는 흑돼지 저녁 \n비용 : 30000원 \n주소 : 제주특별자치도 제주시 애월읍 곽지5길 8-11" },
+                { time: "20:30~21:00", location: "산책",additionalInfo: "가는법 : 도보 \n일정 : 식후 산책을 하자 바다를 보자 " },
+                { time: "21:00~09:00", location: "취침",additionalInfo: "가는법 : 도보 \n일정 : 술 마시고 취침\n비용 : 28882원 \n주소 : 레이지타임 독채 펜션 ( 제주특별자치도 제주시 애월읍 일주서로 6066-22 레이지마마타운하우스 G동 ) " }
+
+
+
+
+            ],
+            day3: [
+                { time: "00:00~09:00", location: "기상",additionalInfo: "일정 : 기상~~~~~~" },
+                { time: "09:00~10:00", location: "숙소->스누피가든" ,additionalInfo: "가는법 : 차 \n일정 : 이동 " },
+                { time: "10:00~11:30", location: "스누피가든" ,additionalInfo: "가는법 : 차 \n 일정 : 스누피 가든 구경 \n비용: 입장비가 19000원... \n주소 : 제주특별자치도 제주시 구좌읍 금백조로 930"},
+                { time: "11:30~12:10", location: "스누피가든->동문시장" ,additionalInfo: "가는법 : 차 \n일정 : 이동"},
+                { time: "12:10~13:00", location: "점심(갈치조림)" ,additionalInfo: "가는법 : 도보 \n일정 : 점심을 먹자 사실 메뉴는 미정  \n비용 : 20000원? \n주소 : 제주특별자치도 제주시 동문로 16"},
+                { time: "13:00~13:30", location: "제주 동문시장" ,additionalInfo: "가는법 : 도보 \n일정 : 자유쇼핑 \n비용 : 각자 \n주소 : 제주특별자치도 제주시 동문로 16 "},
+                { time: "13:30~14:30", location: "찰리공장" ,additionalInfo: "가는법 : 도보 \n일정 : 쇼핑?구경? \n비용 : 각자 \n주소 : 제주특별자치도 제주시 중앙로13길 21 1층"},
+                { time: "14:30~15:00", location: "렌트카 반납" ,additionalInfo: "가는법 : 차를 가지고 가야겠지 아무래도 차를 반납해야하니까 \n일정 : 차 반납 \n비용 : 카센터를 가봐야 알수가 있다 \n주소 : 제주특별자치도 제주시 공항로 2"},
+                { time: "15:00~16:00", location: "분조카" ,additionalInfo: "가는법 : 도보 (차가 없어) \n일정 : 분위기 좋은 카페🌟 \n비용 : 15000원" },
+                { time: "16:00~17:00", location: "제주공항" ,additionalInfo: "가는법 : 도보 (차가 없어) \n일정 : 비행기 탈 준비 해야지" },
+                { time: "17:00~18:00", location: "제주->광주" ,additionalInfo: "가는법 : 비행기 \n일정 : 집에가자 \n비용 : 66700원원" }
+
+            ]
+        };
+
+        function changeDay(day) {
+            const scheduleDiv = document.getElementById('schedule');
+            scheduleDiv.innerHTML = '';
+            schedules[day].forEach(item => {
+                scheduleDiv.innerHTML += `
+                    <div class="schedule-item">
+                        <span class="time">${item.time}</span>
+                        <span>${item.location}</span>
+                        <span><span class="icon" onclick="openModal('${item.location}')">🔖</span></span>
+                    </div>
+                `;
+            });
+            // 현재 활성화된 버튼을 찾고 'active' 클래스 제거
+            document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+            // 클릭된 버튼에 'active' 클래스 추가
+            document.querySelector(`.tabs button[onclick="changeDay('${day}')"]`).classList.add('active');
+        }
+        function openModal(info) {
+            const tabs = document.querySelectorAll('.tabs button');
+            let activeIndex = Array.from(tabs).findIndex(tab => tab.classList.contains('active'));
+        
+            if (activeIndex === -1) {
+                document.getElementById('modalContent').innerHTML = "선택된 날짜를 찾을 수 없습니다.";
+                document.getElementById('myModal').style.display = 'block';
+                return;
+            }
+        
+            const day = `day${activeIndex + 1}`;
+            const scheduleItem = schedules[day]?.find(item => 
+                item.location.replace(/\s+/g, '').toLowerCase() === info.replace(/\s+/g, '').toLowerCase()
+            );
+        
+            if (scheduleItem) {
+                document.getElementById('modalContent').innerHTML = 
+                    `${scheduleItem.additionalInfo?.replace(/\n/g, '<br>') || "추가 정보 없음"}`;
+            } else {
+                document.getElementById('modalContent').innerHTML = `${info}에 대한 정보를 찾을 수 없습니다.`;
+            }
+        
+            document.getElementById('myModal').style.display = 'block';
+        }
+        
+        
+        function closeModal() {
+            document.getElementById('myModal').style.display = 'none';
+        }
+        
+        // 모달을 클릭 외부에서 닫을 수 있도록 설정
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('myModal')) {
+                closeModal();
+            }
+        }
+        
+    </script>
+</body>
+</html>
